@@ -1,20 +1,23 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+    <Map v-bind:position="position" />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import HelloWorld from './components/HelloWorld.vue';
+import Map from './components/Map.vue';
+import Position from './classes/Position';
 
 @Component({
   components: {
-    HelloWorld,
+    Map
   },
 })
-export default class App extends Vue {}
+export default class App extends Vue {
+  position = new Position(1, 2);
+}
 </script>
 
 <style>

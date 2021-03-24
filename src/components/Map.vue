@@ -1,0 +1,36 @@
+
+<template>
+	<div class="map" id="map">
+
+	</div>
+</template>
+
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator';
+
+import L from 'leaflet';
+import { LMap, LTileLayer, LMarker } from 'vue2-leaflet';
+import 'leaflet/dist/leaflet.css';
+
+import Position from '../classes/Position';
+
+@Component
+export default class Map extends Vue {
+	@Prop() private position!: Position;
+
+	map: L.Map|undefined;
+
+	mounted() {
+		this.map = L.map('map').setView([10, 10], 5);
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+		}).addTo(this.map)
+	}
+}
+</script>
+
+<style scoped>
+#map {
+	height: 400px;
+}
+</style>
