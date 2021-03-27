@@ -1,9 +1,12 @@
 
 <template>
 	<div class="waypoint">
-		<input type="number">
-		<input type="number">
-		<button class="buttonRemoveWaypoint">Remove</button>
+		<input type="text">
+		<input type="text">
+		<input type="text">
+		<div class="arrow up" @click="moveWaypointUp"></div>
+		<div class="arrow down" @click="moveWaypointDown"></div>
+		<button class="buttonRemoveWaypoint" @click="removeWaypoint">Remove</button>
 	</div>
 </template>
 
@@ -15,18 +18,31 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 @Component
 export default class WaypointComponent extends Vue {
 	@Prop() private waypoint!: Waypoint
+	@Prop() private removeWaypoint!: () => void
+	@Prop() private moveWaypointUp!: () => void
+	@Prop() private moveWaypointDown!: () => void
 }
 
 </script>
 
 <style scoped>
-.waypoint {
-	display: grid;
-	grid-template-columns: 100px 100px auto 200px;
+
+* {
+	height: 50px;
 }
 
-.buttonRemoveWaypoint {
-	grid-column: 4;
+input {
+	font-size: 18px;
+	height: 70%;
+	margin: 4px;
+}
+
+.waypoint {
+	display: grid;
+	grid-template-columns: 10% 10% auto 5.5% 5.5% 15%;
+	padding: 2px;
+	background-color: #abc;
+	border: solid 2px black;
 }
 
 .buttonRemoveWaypoint {
@@ -35,33 +51,93 @@ export default class WaypointComponent extends Vue {
 	color: #ffffff;
 	cursor: pointer;
 	font-size: 2em;
-	padding: 1.5rem;
+	padding: 0.5rem;
 	border: 0;
 	transition: all 0.5s;
 	border-radius: 10px;
 	width: auto;
 	position: relative;
 }
+
 .buttonRemoveWaypoint::after {
 	content: "〉";
 	font-family: "Font Awesome 5 Pro";
 	font-weight: 400;
 	position: absolute;
 	left: 85%;
-	top: 31%;
+	top: 5%;
 	right: 5%;
 	bottom: 0;
 	opacity: 0;
 }
+
 .buttonRemoveWaypoint:hover {
 	background: red;
 	transition: all 0.5s;
 	border-radius: 10px;
 	box-shadow: 0px 6px 15px #a00;
-	padding: 1.5rem 3.5rem 1.5rem 1.5rem;
+	padding: 0.5rem 3.5rem 0.5rem 0.5rem;
 }
+
 .buttonRemoveWaypoint:hover::after {
 	opacity: 1;
 	transition: all 0.5s;
+}
+
+div.arrow {
+	/*
+	width: 6vmin;
+	height: 6vmin;
+	*/
+	width: 32px;
+	height: 32px;
+
+	box-sizing: border-box;
+	left: 50%;
+	top: 50%;
+	transform: rotate(-45deg);
+}
+div.arrow::before {
+	content: "";
+	width: 100%;
+	height: 100%;
+	border-width: 0.8vmin 0.8vmin 0 0;
+	border-style: solid;
+	border-color: #fafafa;
+	transition: 0.2s ease;
+	display: block;
+	transform-origin: 100% 0;
+}
+div.arrow:after {
+	content: "";
+	float: left;
+	position: relative;
+	top: -100%;
+	width: 100%;
+	height: 100%;
+	border-width: 0 0.8vmin 0 0;
+	border-style: solid;
+	border-color: #fafafa;
+	transform-origin: 100% 0;
+	transition: 0.2s ease;
+}
+div.arrow:hover::after {
+	transform: rotate(45deg);
+	border-color: orange;
+	height: 120%;
+}
+div.arrow:hover::before {
+	border-color: orange;
+	transform: scale(0.8);
+}
+
+div.up {
+	margin-top: 18px;
+	margin-left: 12px;
+}
+
+div.down {
+	transform: rotate(135deg);
+	-webkit-transform: rotate(135deg);
 }
 </style>

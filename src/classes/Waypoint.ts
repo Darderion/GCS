@@ -3,6 +3,9 @@ import Position from './Position'
 
 export default class Waypoint {
 	position: Position;
+	id: number = Waypoint.getId();
+
+	static curId = 0;
 
 	constructor(position: Position) {
 		this.position = position
@@ -14,5 +17,9 @@ export default class Waypoint {
 
 	toString() {
 		return `Waypoint: ${this.position}`
+	}
+
+	static getId() {
+		return Waypoint.curId++;
 	}
 }
