@@ -2,7 +2,8 @@
 <template>
 	<div id="waypoints">
 		<button id="buttonAddWaypoint" @click="addWaypoint()">Add a waypoint</button>
-		<WaypointComponent v-for="waypoint in waypoints" :key="`${waypoint.toString()}${waypoint.id}`" waypoint="waypoint"
+		<WaypointComponent v-for="waypoint in waypoints" :key="`Waypoint${waypoint.id}`"
+			:waypoint="waypoint"
 			:removeWaypoint="_ => { removeWaypoint(waypoint.id) }"
 			:moveWaypointUp="_ => { moveWaypointUp(waypoint.id) }"
 			:moveWaypointDown="_ => { moveWaypointDown(waypoint.id) }"/>
@@ -28,6 +29,10 @@ export default class MissionPlanner extends Vue {
 	position = new Position(1, 2);
 
 	@Prop() private waypoints!: Waypoint[]
+
+	get size() {
+		return this.waypoints.length
+	}
 
 	addWaypoint() {
 		this.waypoints.push(new Waypoint(new Position(0, 0)))

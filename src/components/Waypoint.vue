@@ -1,11 +1,11 @@
 
 <template>
 	<div class="waypoint">
-		<input type="text">
-		<input type="text">
-		<input type="text">
-		<div class="arrow up" @click="moveWaypointUp"></div>
-		<div class="arrow down" @click="moveWaypointDown"></div>
+		<input type="text" v-model="waypoint.position.x">
+		<input type="text" v-model="waypoint.position.y">
+		<input type="text" :value="waypoint">
+		<div class="arrow up" @click="moveWaypointUp" v-if="hasUpperNeighbor()"></div>
+		<div class="arrow down" @click="moveWaypointDown" v-if="hasLowerNeighbor()"></div>
 		<button class="buttonRemoveWaypoint" @click="removeWaypoint">Remove</button>
 	</div>
 </template>
@@ -14,6 +14,7 @@
 
 import Waypoint from '../classes/Waypoint'
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import MissionPlanner from './MissionPlanner.vue';
 
 @Component
 export default class WaypointComponent extends Vue {
@@ -21,6 +22,16 @@ export default class WaypointComponent extends Vue {
 	@Prop() private removeWaypoint!: () => void
 	@Prop() private moveWaypointUp!: () => void
 	@Prop() private moveWaypointDown!: () => void
+
+	missionPlanner = this.$parent as MissionPlanner
+
+	hasUpperNeighbor() {
+		return this.missionPlanner.getWaypointIndex(this.waypoint.id) != 0;
+	}
+
+	hasLowerNeighbor() {
+		return this.missionPlanner.getWaypointIndex(this.waypoint.id) != this.missionPlanner.size - 1;
+	}
 }
 
 </script>
@@ -29,6 +40,18 @@ export default class WaypointComponent extends Vue {
 
 * {
 	height: 50px;
+}
+
+.arrow.up {
+	grid-column: 4;
+}
+
+.arrow.down {
+	grid-column: 5;
+}
+
+.buttonRemoveWaypoint {
+	grid-column: 6;
 }
 
 input {
