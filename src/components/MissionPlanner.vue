@@ -26,7 +26,7 @@ import WaypointComponent from './Waypoint.vue'
 })
 
 export default class MissionPlanner extends Vue {
-	position = new Position(1, 2);
+	position = new Position(1, 2, 3);
 
 	@Prop() private waypoints!: Waypoint[]
 
@@ -35,7 +35,7 @@ export default class MissionPlanner extends Vue {
 	}
 
 	addWaypoint() {
-		this.waypoints.push(new Waypoint(new Position(0, 0)))
+		this.waypoints.push(new Waypoint(new Position(0, 0, 0)))
 	}
 
 	removeWaypoint(id: number) {

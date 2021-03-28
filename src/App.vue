@@ -27,11 +27,11 @@ import MissionPlanner from './components/MissionPlanner.vue';
 	},
 })
 export default class App extends Vue {
-	position = new Position(1, 2);
+	position = new Position(1, 2, 3);
 
 	waypoints: Waypoint[] = [
-		Waypoint.fromPosition(1, 2),
-		Waypoint.fromPosition(3, 4)
+		new Waypoint(new Position(1, 2, 3)),
+		new Waypoint(new Position(4, 5, 6))
 	]
 }
 </script>

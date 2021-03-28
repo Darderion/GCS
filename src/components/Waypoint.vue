@@ -1,8 +1,9 @@
 
 <template>
 	<div class="waypoint">
-		<input type="text" v-model="waypoint.position.x">
-		<input type="text" v-model="waypoint.position.y">
+		<input type="text" v-model="waypoint.position.latitude" placeholder="latitude">
+		<input type="text" v-model="waypoint.position.longitude" placeholder="longitude">
+		<input type="text" v-model="waypoint.position.altitude" placeholder="altitude">
 		<input type="text" :value="waypoint">
 		<div class="arrow up" @click="moveWaypointUp" v-if="hasUpperNeighbor()"></div>
 		<div class="arrow down" @click="moveWaypointDown" v-if="hasLowerNeighbor()"></div>
@@ -42,30 +43,30 @@ export default class WaypointComponent extends Vue {
 	height: 50px;
 }
 
-.arrow.up {
-	grid-column: 4;
+.waypoint {
+	display: grid;
+	grid-template-columns: 10% 10% 10% auto 5.5% 5.5% 15%;
+	padding: 2px;
+	background-color: #abc;
+	border: solid 2px black;
 }
 
-.arrow.down {
+.arrow.up {
 	grid-column: 5;
 }
 
-.buttonRemoveWaypoint {
+.arrow.down {
 	grid-column: 6;
+}
+
+.buttonRemoveWaypoint {
+	grid-column: 7;
 }
 
 input {
 	font-size: 18px;
 	height: 70%;
 	margin: 4px;
-}
-
-.waypoint {
-	display: grid;
-	grid-template-columns: 10% 10% auto 5.5% 5.5% 15%;
-	padding: 2px;
-	background-color: #abc;
-	border: solid 2px black;
 }
 
 .buttonRemoveWaypoint {

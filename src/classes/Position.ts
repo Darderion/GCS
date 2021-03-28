@@ -1,14 +1,16 @@
 
 export default class Position {
-	x: number;
-	y: number;
+	latitude: number;
+	longitude: number;
+	altitude: number;
 
-	constructor(x: number, y: number) {
-		this.x = x;
-		this.y = y;
+	constructor(latitude: number, longitude: number, altitude: number) {
+		this.latitude = latitude
+		this.longitude = longitude
+		this.altitude = altitude
 	}
 
 	toString() {
-		return `{ ${this.x}; ${this.y} }`;
+		return `{ ${this.latitude}; ${this.longitude}; ${this.altitude}}`
 	}
 }
