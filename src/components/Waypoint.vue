@@ -1,9 +1,12 @@
 
 <template>
 	<div class="waypoint">
-		<input type="text" v-model="waypoint.position.latitude" placeholder="latitude">
-		<input type="text" v-model="waypoint.position.longitude" placeholder="longitude">
-		<input type="text" v-model="waypoint.position.altitude" placeholder="altitude">
+		<input type="text" v-model="waypoint.position.latitude" placeholder="latitude"
+			@keypress="checkCharacter($event)" @keyup="checkWaypoint()" :id="`Waypoint${waypoint.id}_latitude`">
+		<input type="text" v-model="waypoint.position.longitude" placeholder="longitude"
+			@keypress="checkCharacter($event)" @keyup="checkWaypoint()" :id="`Waypoint${waypoint.id}_longitude`">
+		<input type="text" v-model="waypoint.position.altitude" placeholder="altitude"
+			@keypress="checkCharacter($event)" @keyup="checkWaypoint()" :id="`Waypoint${waypoint.id}_altitude`">
 		<input type="text" :value="waypoint">
 		<div class="arrow up" @click="moveWaypointUp" v-if="hasUpperNeighbor()"></div>
 		<div class="arrow down" @click="moveWaypointDown" v-if="hasLowerNeighbor()"></div>
@@ -33,6 +36,37 @@ export default class WaypointComponent extends Vue {
 	hasLowerNeighbor() {
 		return this.missionPlanner.getWaypointIndex(this.waypoint.id) != this.missionPlanner.size - 1;
 	}
+
+	checkWaypoint() {
+		const fields = this.waypoint.errorValues()
+		const waypointLatitude = document.getElementById(`Waypoint${this.waypoint.id}_latitude`)
+		const waypointLongitude = document.getElementById(`Waypoint${this.waypoint.id}_longitude`)
+		const waypointAltitude = document.getElementById(`Waypoint${this.waypoint.id}_altitude`)
+
+		if (!(waypointLatitude && waypointLongitude && waypointAltitude)) {
+			throw Error("Waypoint not found")
+		}
+
+		if (!fields.includes(Waypoint.OPTIONS.latitude)) {
+			waypointLatitude.classList.remove("inputTextNaN")
+		} else {
+			waypointLatitude.classList.add("inputTextNaN")
+		}
+	}
+
+    checkCharacter(event: Event | undefined) {
+		// Modified code from:
+		//	https://stackoverflow.com/questions/39782176/filter-input-text-only-accept-number-and-dot-vue-js
+
+		event = (event) ? event : window.event;
+		if (!event) return
+
+		const evt = event as KeyboardEvent
+		var charCode = (evt.which) ? evt.which : evt.keyCode;
+		if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 46) {
+			evt.preventDefault();
+		}
+    }
 }
 
 </script>
@@ -163,5 +197,16 @@ div.up {
 div.down {
 	transform: rotate(135deg);
 	-webkit-transform: rotate(135deg);
+}
+
+#wrap {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 60px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+}
+
+.inputTextNaN {
+	background-color: red;
 }
 </style>

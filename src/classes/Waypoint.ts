@@ -2,6 +2,17 @@
 import Position from './Position'
 
 export default class Waypoint {
+
+	static OPTIONS = {
+		hold: 1,
+		acceptRadius: 2,
+		passRadius: 3,
+		yaw: 4,
+		latitude: 5,
+		longitude: 6,
+		altitude: 7
+	}
+
 	// MAV_CMD_NAV_WAYPOINT
 	/*
 	Param (:Label)			Values		Units
@@ -47,5 +58,42 @@ export default class Waypoint {
 
 	static getId() {
 		return Waypoint.curId++;
+	}
+
+	isCorrect() {
+		return (this.errorValues().length == 0)
+	}
+
+	errorValues() {
+		const vars = [
+			this.hold,
+			this.acceptRadius,
+			this.passRadius,
+			this.yaw,
+
+			this.position.latitude,
+			this.position.longitude,
+			this.position.altitude
+		]
+
+		const res: number[] = []
+
+		vars.map((number, index) => ({
+			number, index
+		})).filter(item => {
+			return isNaN(item.number)
+		}).forEach(item => {
+			res.push(item.index + 1)
+		})
+
+		if (!(res.includes(Waypoint.OPTIONS.hold)) && vars[Waypoint.OPTIONS.hold - 1] < 0) {
+			res.push(Waypoint.OPTIONS.hold)
+		}
+
+		if (!(res.includes(Waypoint.OPTIONS.acceptRadius)) && vars[Waypoint.OPTIONS.acceptRadius - 1] < 0) {
+			res.push(Waypoint.OPTIONS.acceptRadius)
+		}
+
+		return res
 	}
 }

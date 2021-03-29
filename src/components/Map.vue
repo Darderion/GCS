@@ -21,7 +21,7 @@ export default class Map extends Vue {
 	map: L.Map|undefined;
 
 	mounted() {
-		this.map = L.map('map').setView([10, 10], 5);
+		this.map = L.map('map').setView([59.87994329833602, 29.82886671034883], 18);
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 		}).addTo(this.map)
