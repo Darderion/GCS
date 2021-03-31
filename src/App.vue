@@ -2,10 +2,10 @@
 	<div id="app">
 		<div id="main">
 			<Menu/>
-			<Map v-bind:position="position" />
+			<Map v-bind:position="position" :addMap="addMap"/>
 		</div>
 
-		<MissionPlanner :waypoints="waypoints"/>
+		<MissionPlanner :waypoints="waypoints" :position="position" :addMarker="addMarker"/>
 	</div>
 </template>
 
@@ -18,6 +18,8 @@ import WaypointComponent from './components/Waypoint.vue';
 import Menu from './components/Menu.vue';
 import MissionPlanner from './components/MissionPlanner.vue';
 
+import L from 'leaflet';
+
 @Component({
 	components: {
 		Map,
@@ -27,12 +29,25 @@ import MissionPlanner from './components/MissionPlanner.vue';
 	},
 })
 export default class App extends Vue {
-	position = new Position(1, 2, 3);
+	static position = new Position(59.87994329833602, 29.82886671034883, 100)
+
+	get position() {
+		return App.position
+	}
 
 	waypoints: Waypoint[] = [
-		new Waypoint(new Position(1, 2, 3)),
-		new Waypoint(new Position(4, 5, 6))
 	]
+
+	maps: L.Map[] = [
+	]
+
+	addMap(map: L.Map) {
+		this.maps.push(map)
+	}
+
+	addMarker(marker: L.Marker) {
+		marker.addTo(this.maps[0])
+	}
 }
 </script>
 

@@ -6,13 +6,18 @@
 			:waypoint="waypoint"
 			:removeWaypoint="_ => { removeWaypoint(waypoint.id) }"
 			:moveWaypointUp="_ => { moveWaypointUp(waypoint.id) }"
-			:moveWaypointDown="_ => { moveWaypointDown(waypoint.id) }"/>
+			:moveWaypointDown="_ => { moveWaypointDown(waypoint.id) }"
+			:marker="getMarker(waypoint.id)"/>
 	</div>
 </template>
 
 <script lang="ts">
 
 import { Component, Vue, Prop } from 'vue-property-decorator';
+
+import { empty, set, get } from '@typed/hashmap'
+
+import L from 'leaflet';
 
 import Waypoint from '../classes/Waypoint'
 import Position from '../classes/Position'
@@ -26,16 +31,41 @@ import WaypointComponent from './Waypoint.vue'
 })
 
 export default class MissionPlanner extends Vue {
-	position = new Position(1, 2, 3);
-
 	@Prop() private waypoints!: Waypoint[]
+	@Prop() private position!: Position
+	@Prop() private addMarker!: (marker: L.Marker) => void
+
+	markers = empty<number, L.Marker>();
 
 	get size() {
 		return this.waypoints.length
 	}
 
+	getWaypointLocation() {
+		return new Position(
+			this.position.latitude + (Math.random() % 100 * 0.001),
+			this.position.longitude + (Math.random() % 100 * 0.001),
+			this.position.altitude
+		)
+	}
+
 	addWaypoint() {
-		this.waypoints.push(new Waypoint(new Position(0, 0, 0)))
+		const waypoint = new Waypoint(this.getWaypointLocation())
+
+		const marker = new L.Marker(L.latLng(
+			waypoint.position.latitude,
+			waypoint.position.longitude
+		))
+
+		this.addMarker(marker)
+
+		this.markers = set(waypoint.id, marker, this.markers)
+
+		this.waypoints.push(waypoint)
+	}
+
+	getMarker(id: number) {
+		return get(id, this.markers)
 	}
 
 	removeWaypoint(id: number) {

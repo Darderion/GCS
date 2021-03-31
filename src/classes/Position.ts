@@ -11,6 +11,6 @@ export default class Position {
 	}
 
 	toString() {
-		return `{ ${this.latitude}; ${this.longitude}; ${this.altitude}}`
+		return `{ ${this.latitude}; ${this.longitude}; ${this.altitude} }`
 	}
 }
