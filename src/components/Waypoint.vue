@@ -76,7 +76,6 @@ export default class WaypointComponent extends Vue {
     }
 
 	updateMarker() {
-		console.log(this.marker)
 		this.marker.setLatLng(
 			new L.LatLng(this.waypoint.position.latitude, this.waypoint.position.longitude, this.waypoint.position.altitude)
 		)
