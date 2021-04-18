@@ -5,7 +5,7 @@
 			<Map v-bind:position="position" :addMap="addMap"/>
 		</div>
 
-		<MissionPlanner :waypoints="waypoints" :position="position" :addMarker="addMarker"/>
+		<MissionPlanner :startingWaypoints="waypoints" :position="position" :addMarker="addMarker" :removeMarker="removeMarker"/>
 	</div>
 </template>
 
@@ -47,6 +47,10 @@ export default class App extends Vue {
 
 	addMarker(marker: L.Marker) {
 		marker.addTo(this.maps[0])
+	}
+
+	removeMarker(marker: L.Marker) {
+		marker.removeFrom(this.maps[0])
 	}
 }
 </script>

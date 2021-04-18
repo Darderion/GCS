@@ -10,7 +10,7 @@
 		<input type="text" :value="waypoint">
 		<div class="arrow up" @click="moveWaypointUp" v-if="hasUpperNeighbor()"></div>
 		<div class="arrow down" @click="moveWaypointDown" v-if="hasLowerNeighbor()"></div>
-		<button class="buttonRemoveWaypoint" @click="removeWaypoint">Remove</button>
+		<button class="buttonRemoveWaypoint" @click="removeComponent">Remove</button>
 	</div>
 </template>
 
@@ -29,8 +29,14 @@ export default class WaypointComponent extends Vue {
 	@Prop() private moveWaypointUp!: () => void
 	@Prop() private moveWaypointDown!: () => void
 	@Prop() private marker!: L.Marker
+	@Prop() private removeMarker!: (marker: L.Marker) => void
 
 	missionPlanner = this.$parent as MissionPlanner
+
+	removeComponent() {
+		this.removeWaypoint()
+		this.removeMarker(this.marker)
+	}
 
 	hasUpperNeighbor() {
 		return this.missionPlanner.getWaypointIndex(this.waypoint.id) != 0;
@@ -88,14 +94,6 @@ export default class WaypointComponent extends Vue {
 
 * {
 	height: 50px;
-}
-
-.waypoint {
-	display: grid;
-	grid-template-columns: 10% 10% 10% auto 5.5% 5.5% 15%;
-	padding: 2px;
-	background-color: #abc;
-	border: solid 2px black;
 }
 
 .arrow.up {

@@ -1,13 +1,19 @@
 
 <template>
 	<div id="waypoints">
-		<button id="buttonAddWaypoint" @click="addWaypoint()">Add a waypoint</button>
+		<div class="waypoint">
+			<label>Latitude</label>
+			<label>Longitude</label>
+			<label>Altitude</label>
+			<button id="buttonAddWaypoint" @click="addWaypoint()">Add a waypoint</button>
+		</div>
 		<WaypointComponent v-for="waypoint in waypoints" :key="`Waypoint${waypoint.id}`"
 			:waypoint="waypoint"
 			:removeWaypoint="_ => { removeWaypoint(waypoint.id) }"
 			:moveWaypointUp="_ => { moveWaypointUp(waypoint.id) }"
 			:moveWaypointDown="_ => { moveWaypointDown(waypoint.id) }"
-			:marker="getMarker(waypoint.id)"/>
+			:marker="getMarker(waypoint.id)"
+			:removeMarker="removeMarker"/>
 	</div>
 </template>
 
@@ -31,11 +37,14 @@ import WaypointComponent from './Waypoint.vue'
 })
 
 export default class MissionPlanner extends Vue {
-	@Prop() private waypoints!: Waypoint[]
+	@Prop() private startingWaypoints!: Waypoint[]
 	@Prop() private position!: Position
 	@Prop() private addMarker!: (marker: L.Marker) => void
+	@Prop() private removeMarker!: (marker: L.Marker) => void
 
 	markers = empty<number, L.Marker>();
+
+	waypoints = [ ...this.startingWaypoints ]
 
 	get size() {
 		return this.waypoints.length
@@ -117,6 +126,14 @@ export default class MissionPlanner extends Vue {
 </script>
 
 <style scoped>
+.waypoint {
+	display: grid;
+	grid-template-columns: 10% 10% 10% auto 5.5% 5.5% 15%;
+	padding: 2px;
+	background-color: #abc;
+	border: solid 2px black;
+}
+
 #waypoints {
 	display: grid;
 	grid-template-rows: 70px;
@@ -126,5 +143,11 @@ export default class MissionPlanner extends Vue {
 
 #buttonAddWaypoint {
 	margin: 4px;
+	grid-column: -1;
+}
+
+label {
+	font-size: 22px;
+	margin-top: 10%;
 }
 </style>
