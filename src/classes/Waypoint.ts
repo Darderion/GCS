@@ -86,11 +86,22 @@ export default class Waypoint {
 			res.push(item.index + 1)
 		})
 
-		if (!(res.includes(Waypoint.OPTIONS.hold)) && vars[Waypoint.OPTIONS.hold - 1] < 0) {
+		if ((!(res.includes(Waypoint.OPTIONS.latitude)) &&
+			(vars[Waypoint.OPTIONS.latitude - 1] < -90) || vars[Waypoint.OPTIONS.latitude - 1] > 90)) {
+			res.push(Waypoint.OPTIONS.latitude)
+			console.log(vars[Waypoint.OPTIONS.latitude - 1])
+		}
+
+		if ((!(res.includes(Waypoint.OPTIONS.longitude)) &&
+			(vars[Waypoint.OPTIONS.longitude - 1] < -180) || vars[Waypoint.OPTIONS.longitude - 1] > 180)) {
+			res.push(Waypoint.OPTIONS.longitude)
+		}
+
+		if ((!(res.includes(Waypoint.OPTIONS.hold))) && vars[Waypoint.OPTIONS.hold - 1] < 0) {
 			res.push(Waypoint.OPTIONS.hold)
 		}
 
-		if (!(res.includes(Waypoint.OPTIONS.acceptRadius)) && vars[Waypoint.OPTIONS.acceptRadius - 1] < 0) {
+		if ((!(res.includes(Waypoint.OPTIONS.acceptRadius))) && vars[Waypoint.OPTIONS.acceptRadius - 1] < 0) {
 			res.push(Waypoint.OPTIONS.acceptRadius)
 		}
 

@@ -7,10 +7,17 @@
 			@keypress="checkCharacter($event)" @keyup="checkWaypoint()" :id="`Waypoint${waypoint.id}_longitude`">
 		<input type="text" v-model="waypoint.position.altitude" placeholder="altitude"
 			@keypress="checkCharacter($event)" @keyup="checkWaypoint()" :id="`Waypoint${waypoint.id}_altitude`">
-		<input type="text" :value="waypoint">
+		<input type="text" v-model="waypoint.yaw" placeholder="yaw"
+			@keypress="checkCharacter($event)" @keyup="checkWaypoint()" :id="`Waypoint${waypoint.id}_yaw`">
+		<input type="text" v-model="waypoint.hold" placeholder="hold"
+			@keypress="checkCharacter($event)" @keyup="checkWaypoint()" :id="`Waypoint${waypoint.id}_hold`">
+		<input type="text" v-model="waypoint.acceptRadius" placeholder="accept radius"
+			@keypress="checkCharacter($event)" @keyup="checkWaypoint()" :id="`Waypoint${waypoint.id}_acceptRadius`">
+		<input type="text" v-model="waypoint.passRadius" placeholder="pass radius"
+			@keypress="checkCharacter($event)" @keyup="checkWaypoint()" :id="`Waypoint${waypoint.id}_passRadius`">
 		<div class="arrow up" @click="moveWaypointUp" v-if="hasUpperNeighbor()"></div>
 		<div class="arrow down" @click="moveWaypointDown" v-if="hasLowerNeighbor()"></div>
-		<button class="buttonRemoveWaypoint" @click="removeComponent">Remove</button>
+		<button class="buttonWaypoint buttonRemoveWaypoint" @click="removeComponent">Remove</button>
 	</div>
 </template>
 
@@ -48,22 +55,43 @@ export default class WaypointComponent extends Vue {
 
 	// This function highlights fields that have either type or constraint errors in them
 	checkWaypoint() {
-		this.updateMarker()
-
 		const fields = this.waypoint.errorValues()
-		const waypointLatitude = document.getElementById(`Waypoint${this.waypoint.id}_latitude`)
-		const waypointLongitude = document.getElementById(`Waypoint${this.waypoint.id}_longitude`)
-		const waypointAltitude = document.getElementById(`Waypoint${this.waypoint.id}_altitude`)
 
-		if (!(waypointLatitude && waypointLongitude && waypointAltitude)) {
+		if (fields.length == 0) this.updateMarker();
+
+		const waypointComponents = [
+			document.getElementById(`Waypoint${this.waypoint.id}_latitude`),
+			document.getElementById(`Waypoint${this.waypoint.id}_longitude`),
+			document.getElementById(`Waypoint${this.waypoint.id}_altitude`),
+			document.getElementById(`Waypoint${this.waypoint.id}_yaw`),
+			document.getElementById(`Waypoint${this.waypoint.id}_hold`),
+			document.getElementById(`Waypoint${this.waypoint.id}_acceptRadius`),
+			document.getElementById(`Waypoint${this.waypoint.id}_passRadius`)
+		]
+
+		if (waypointComponents.filter(item => item == null).length != 0) {
 			throw Error("Waypoint not found")
 		}
 
-		if (!fields.includes(Waypoint.OPTIONS.latitude)) {
-			waypointLatitude.classList.remove("inputTextNaN")
-		} else {
-			waypointLatitude.classList.add("inputTextNaN")
-		}
+		const position = [
+			fields.includes(Waypoint.OPTIONS.latitude),
+			fields.includes(Waypoint.OPTIONS.longitude),
+			fields.includes(Waypoint.OPTIONS.altitude),
+			fields.includes(Waypoint.OPTIONS.yaw),
+			fields.includes(Waypoint.OPTIONS.hold),
+			fields.includes(Waypoint.OPTIONS.acceptRadius),
+			fields.includes(Waypoint.OPTIONS.passRadius)
+			]
+
+		position.forEach((value, index) => {
+			if (value) {
+				waypointComponents[index]?.classList.add("inputTextNaN")
+			} else {
+				waypointComponents[index]?.classList.remove("inputTextNaN")
+			}
+		})
+
+		console.log(fields)
 	}
 
 	// This function prevents any inputs other than [ '0', '1', ... , '9', '.' ]
@@ -76,12 +104,13 @@ export default class WaypointComponent extends Vue {
 
 		const evt = event as KeyboardEvent
 		var charCode = (evt.which) ? evt.which : evt.keyCode;
-		if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 46) {
+		if ((charCode != 45) && (charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 46) {
 			evt.preventDefault();
 		}
     }
 
 	updateMarker() {
+		console.log(this.waypoint.position.latitude + ", " + this.waypoint.position.longitude + ", " + this.waypoint.position.altitude)
 		this.marker.setLatLng(
 			new L.LatLng(this.waypoint.position.latitude, this.waypoint.position.longitude, this.waypoint.position.altitude)
 		)
@@ -97,15 +126,15 @@ export default class WaypointComponent extends Vue {
 }
 
 .arrow.up {
-	grid-column: 5;
+	grid-column: 8;
 }
 
 .arrow.down {
-	grid-column: 6;
+	grid-column: 9;
 }
 
 .buttonRemoveWaypoint {
-	grid-column: 7;
+	grid-column: 10;
 }
 
 input {
@@ -115,42 +144,7 @@ input {
 }
 
 .buttonRemoveWaypoint {
-	font-family: Hack, monospace;
 	background: #a00;
-	color: #ffffff;
-	cursor: pointer;
-	font-size: 2em;
-	padding: 0.5rem;
-	border: 0;
-	transition: all 0.5s;
-	border-radius: 10px;
-	width: auto;
-	position: relative;
-}
-
-.buttonRemoveWaypoint::after {
-	content: "〉";
-	font-family: "Font Awesome 5 Pro";
-	font-weight: 400;
-	position: absolute;
-	left: 85%;
-	top: 5%;
-	right: 5%;
-	bottom: 0;
-	opacity: 0;
-}
-
-.buttonRemoveWaypoint:hover {
-	background: red;
-	transition: all 0.5s;
-	border-radius: 10px;
-	box-shadow: 0px 6px 15px #a00;
-	padding: 0.5rem 3.5rem 0.5rem 0.5rem;
-}
-
-.buttonRemoveWaypoint:hover::after {
-	opacity: 1;
-	transition: all 0.5s;
 }
 
 div.arrow {

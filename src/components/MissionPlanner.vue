@@ -5,7 +5,11 @@
 			<label>Latitude</label>
 			<label>Longitude</label>
 			<label>Altitude</label>
-			<button id="buttonAddWaypoint" @click="addWaypoint()">Add a waypoint</button>
+			<label>Yaw</label>
+			<label>Hold</label>
+			<label>Accept radius</label>
+			<label>Pass radius</label>
+			<button id="buttonAddWaypoint" class="buttonWaypoint buttonAddWaypoint" @click="addWaypoint()">Add a waypoint</button>
 		</div>
 		<WaypointComponent v-for="waypoint in waypoints" :key="`Waypoint${waypoint.id}`"
 			:waypoint="waypoint"
@@ -125,29 +129,89 @@ export default class MissionPlanner extends Vue {
 }
 </script>
 
-<style scoped>
+<style>
 .waypoint {
 	display: grid;
-	grid-template-columns: 10% 10% 10% auto 5.5% 5.5% 15%;
+	grid-template-columns: 10% 10% 10% 5% 5% 5% 24% 5.5% 5.5% 250px;
 	padding: 2px;
 	background-color: #abc;
 	border: solid 2px black;
+	left: 0;
+	right: 0;
+	box-sizing: border-box;
+	height: 60px;
+	width: 80%;
+	min-width: 1450px;
+	margin-left: 200px;
 }
 
 #waypoints {
 	display: grid;
-	grid-template-rows: 70px;
 	width: 80%;
-	margin: 12px auto auto auto;
+	margin-top: 1%;
+	box-sizing: border-box;
 }
 
 #buttonAddWaypoint {
 	margin: 4px;
-	grid-column: -1;
+	grid-column: 10;
 }
 
 label {
 	font-size: 22px;
-	margin-top: 10%;
+	/*
+	margin: auto;
+	*/
+}
+
+.buttonWaypoint {
+	font-family: Hack, monospace;
+	color: #ffffff;
+	cursor: pointer;
+	font-size: 2em;
+	padding: 0.5rem;
+	border: 0;
+	transition: all 0.5s;
+	border-radius: 10px;
+	position: relative;
+	box-sizing: border-box;
+}
+
+.buttonWaypoint::after {
+	content: "〉";
+	font-family: "Font Awesome 5 Pro";
+	font-weight: 400;
+	position: absolute;
+	left: 85%;
+	top: 5%;
+	right: 5%;
+	bottom: 0;
+	opacity: 0;
+}
+
+.buttonRemoveWaypoint:hover {
+	background-color: red;
+	box-shadow: 0px 6px 15px #a00;
+}
+
+.buttonWaypoint:hover {
+	transition: all 0.5s;
+	border-radius: 10px;
+	padding: 0.5rem 3.5rem 0.5rem 0.5rem;
+}
+
+.buttonWaypoint:hover::after {
+	opacity: 1;
+	transition: all 0.5s;
+}
+
+.buttonAddWaypoint {
+	font-size: 20px;
+	background-color: green;
+}
+
+.buttonAddWaypoint:hover {
+	background-color: green;
+	box-shadow: 0px 6px 15px #0a0;
 }
 </style>
