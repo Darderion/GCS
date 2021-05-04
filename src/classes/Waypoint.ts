@@ -107,4 +107,17 @@ export default class Waypoint {
 
 		return res
 	}
+
+	toURI(): string {
+		return `
+			lat=${encodeURIComponent(this.position.latitude)}&
+			lon=${encodeURIComponent(this.position.longitude)}&
+			alt=${encodeURIComponent(this.position.altitude)}&
+			id=${encodeURIComponent(this.id)}&
+			hold=${encodeURIComponent(this.hold)}&
+			ar=${encodeURIComponent(this.acceptRadius)}&
+			pr=${encodeURIComponent(this.passRadius)}&
+			yaw=${encodeURIComponent(this.yaw)}
+		`
+	}
 }

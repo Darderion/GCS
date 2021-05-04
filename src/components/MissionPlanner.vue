@@ -25,6 +25,10 @@
 
 import { Component, Vue, Prop } from 'vue-property-decorator';
 
+import * as $ from "jquery";
+
+import { mavLink } from '../classes/mavlink'
+
 import { empty, set, get } from '@typed/hashmap'
 
 import L from 'leaflet';
@@ -33,6 +37,12 @@ import Waypoint from '../classes/Waypoint'
 import Position from '../classes/Position'
 
 import WaypointComponent from './Waypoint.vue'
+import { Heartbeat } from '@/classes/mavlink/messages/heartbeat';
+import { MissionItem } from '@/classes/mavlink/messages/mission-item';
+import { MissionClearAll } from '@/classes/mavlink/messages/mission-clear-all';
+import { MavFrame } from '@/classes/mavlink/enums/mav-frame';
+import { MavCmd } from '@/classes/mavlink/enums/mav-cmd';
+import { MavMissionType } from '@/classes/mavlink/enums/mav-mission-type';
 
 @Component({
 	components: {
@@ -50,11 +60,19 @@ export default class MissionPlanner extends Vue {
 
 	waypoints = [ ...this.startingWaypoints ]
 
-	get size() {
+	get size(): number {
 		return this.waypoints.length
 	}
 
-	getWaypointLocation() {
+	get SYSTEM_ID(): number {
+		return 1;
+	}
+
+	get COMPONENT_ID(): number {
+		return 2;
+	}
+
+	getWaypointLocation(): Position {
 		return new Position(
 			this.position.latitude + (Math.random() % 100 * 0.001),
 			this.position.longitude + (Math.random() % 100 * 0.001),
@@ -62,7 +80,7 @@ export default class MissionPlanner extends Vue {
 		)
 	}
 
-	addWaypoint() {
+	addWaypoint(): void {
 		const waypoint = new Waypoint(this.getWaypointLocation())
 
 		const marker = new L.Marker(L.latLng(
@@ -75,19 +93,39 @@ export default class MissionPlanner extends Vue {
 		this.markers = set(waypoint.id, marker, this.markers)
 
 		this.waypoints.push(waypoint)
+
+		const missionItem = new MissionItem(this.SYSTEM_ID, this.COMPONENT_ID)
+		missionItem.seq = this.waypoints.length - 1
+		missionItem.frame = MavFrame.MAV_FRAME_GLOBAL
+		missionItem.command = MavCmd.MAV_CMD_NAV_WAYPOINT
+		missionItem.current = 0
+		missionItem.autocontinue = 1
+		missionItem.x = waypoint.position.latitude
+		missionItem.y = waypoint.position.longitude
+		missionItem.z = waypoint.position.altitude
+		missionItem.mission_type = MavMissionType.MAV_MISSION_TYPE_MISSION
+
+		$.ajax({
+			url: `${window.location.href}/mavlink`,
+			data: [ mavLink.pack([missionItem]) ],
+			success: console.log
+		})
+
+		console.log(missionItem.seq)
 	}
 
 	getMarker(id: number) {
 		return get(id, this.markers)
 	}
 
-	removeWaypoint(id: number) {
+	removeWaypoint(id: number): void {
 		this.waypoints = this.waypoints.filter(waypoint => {
 			return waypoint.id != id
 		})
+		this.updateWaypoints()
 	}
 
-	getWaypointIndex(id: number) {
+	getWaypointIndex(id: number): number {
 		const waypoints = this.waypoints.map((waypoint, ind) => ({
 			waypoint, ind
 		})).filter(item => item.waypoint.id == id)
@@ -97,7 +135,7 @@ export default class MissionPlanner extends Vue {
 		return waypoints[0].ind
 	}
 
-	moveWaypointUp(id: number) {
+	moveWaypointUp(id: number): void {
 		if (this.waypoints.length < 2) return;
 
 		const ind = this.getWaypointIndex(id)
@@ -113,18 +151,51 @@ export default class MissionPlanner extends Vue {
 
 		const waypoints = [ this.waypoints[ind], this.waypoints[ind - 1] ]
 		this.waypoints.splice(ind - 1, 2, waypoints[0], waypoints[1])
+
+		this.updateWaypoints()
 	}
 
-	moveWaypointDown(id: number) {
+	moveWaypointDown(id: number): void {
 		if (this.waypoints.length < 2) return;
 
 		const ind = this.getWaypointIndex(id)
 
 		if (ind < 0) return;
-		if (ind == this.waypoints.length - 1) return;
+		if (ind >= this.waypoints.length - 1) return;
 
 		const waypoints = [ this.waypoints[ind + 1], this.waypoints[ind] ]
 		this.waypoints.splice(ind, 2, waypoints[0], waypoints[1])
+
+		this.updateWaypoints()
+	}
+
+	updateWaypoints(): void {
+		const missionClearAll = new MissionClearAll(this.SYSTEM_ID, this.COMPONENT_ID)
+		missionClearAll.mission_type = MavMissionType.MAV_MISSION_TYPE_MISSION
+
+		const missionItems = []
+
+		for(let i = 0; i < this.waypoints.length; i++) {
+			missionItems.push(new MissionItem(this.SYSTEM_ID, this.COMPONENT_ID))
+			const missionItem = missionItems[i];
+			missionItem.seq = i
+			missionItem.frame = MavFrame.MAV_FRAME_GLOBAL
+			missionItem.command = MavCmd.MAV_CMD_NAV_WAYPOINT
+			missionItem.current = 0
+			missionItem.autocontinue = 1
+			missionItem.x = this.waypoints[i].position.latitude
+			missionItem.y = this.waypoints[i].position.longitude
+			missionItem.z = this.waypoints[i].position.altitude
+			missionItem.mission_type = MavMissionType.MAV_MISSION_TYPE_MISSION
+		}
+
+		const mavLinkMessages = [ missionClearAll, ...missionItems ]
+
+		$.ajax({
+			url: `${window.location.href}/mavlink`,
+			data: [ mavLink.pack(mavLinkMessages) ],
+			success: console.log
+		})
 	}
 }
 </script>
@@ -132,7 +203,7 @@ export default class MissionPlanner extends Vue {
 <style>
 .waypoint {
 	display: grid;
-	grid-template-columns: 10% 10% 10% 5% 5% 5% 24% 5.5% 5.5% 250px;
+	grid-template-columns: 20% 20% 9% 5% 5% 5% 5% 5.5% 5.5% 250px;
 	padding: 2px;
 	background-color: #abc;
 	border: solid 2px black;
