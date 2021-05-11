@@ -9,7 +9,7 @@
 			<label>Hold</label>
 			<label>Accept radius</label>
 			<label>Pass radius</label>
-			<button id="buttonAddWaypoint" class="buttonWaypoint buttonAddWaypoint" @click="addWaypoint()">Add a waypoint</button>
+			<button id="buttonAddWaypoint" class="buttonWaypoint buttonGreen" @click="addWaypoint()">Add a waypoint</button>
 		</div>
 		<WaypointComponent v-for="waypoint in waypoints" :key="`Waypoint${waypoint.id}`"
 			:waypoint="waypoint"
@@ -17,6 +17,7 @@
 			:moveWaypointUp="_ => { moveWaypointUp(waypoint.id) }"
 			:moveWaypointDown="_ => { moveWaypointDown(waypoint.id) }"
 			:marker="getMarker(waypoint.id)"
+			:updateWaypoints="updateWaypoints"
 			:removeMarker="removeMarker"/>
 	</div>
 </template>
@@ -43,6 +44,7 @@ import { MissionClearAll } from '@/classes/mavlink/messages/mission-clear-all';
 import { MavFrame } from '@/classes/mavlink/enums/mav-frame';
 import { MavCmd } from '@/classes/mavlink/enums/mav-cmd';
 import { MavMissionType } from '@/classes/mavlink/enums/mav-mission-type';
+import { send } from '@/classes/AjaxRequest';
 
 @Component({
 	components: {
@@ -50,11 +52,15 @@ import { MavMissionType } from '@/classes/mavlink/enums/mav-mission-type';
 	},
 })
 
+// A component that allows the user to add, change and remove waypoints
+
 export default class MissionPlanner extends Vue {
 	@Prop() private startingWaypoints!: Waypoint[]
 	@Prop() private position!: Position
 	@Prop() private addMarker!: (marker: L.Marker) => void
 	@Prop() private removeMarker!: (marker: L.Marker) => void
+	@Prop() private SYSTEM_ID!: () => number;
+	@Prop() private COMPONENT_ID!: () => number;
 
 	markers = empty<number, L.Marker>();
 
@@ -64,14 +70,8 @@ export default class MissionPlanner extends Vue {
 		return this.waypoints.length
 	}
 
-	get SYSTEM_ID(): number {
-		return 1;
-	}
-
-	get COMPONENT_ID(): number {
-		return 2;
-	}
-
+	// Test function that returns a position which is close to starting position
+	// Used to assign position to added waypoints before user enters exact coordinates needed for added mission item
 	getWaypointLocation(): Position {
 		return new Position(
 			this.position.latitude + (Math.random() % 100 * 0.001),
@@ -94,7 +94,7 @@ export default class MissionPlanner extends Vue {
 
 		this.waypoints.push(waypoint)
 
-		const missionItem = new MissionItem(this.SYSTEM_ID, this.COMPONENT_ID)
+		const missionItem = new MissionItem(this.SYSTEM_ID(), this.COMPONENT_ID())
 		missionItem.seq = this.waypoints.length - 1
 		missionItem.frame = MavFrame.MAV_FRAME_GLOBAL
 		missionItem.command = MavCmd.MAV_CMD_NAV_WAYPOINT
@@ -104,14 +104,8 @@ export default class MissionPlanner extends Vue {
 		missionItem.y = waypoint.position.longitude
 		missionItem.z = waypoint.position.altitude
 		missionItem.mission_type = MavMissionType.MAV_MISSION_TYPE_MISSION
-
-		$.ajax({
-			url: `${window.location.href}/mavlink`,
-			data: [ mavLink.pack([missionItem]) ],
-			success: console.log
-		})
-
-		console.log(missionItem.seq)
+		
+		send('mavlink/missionItem', missionItem)
 	}
 
 	getMarker(id: number) {
@@ -170,13 +164,13 @@ export default class MissionPlanner extends Vue {
 	}
 
 	updateWaypoints(): void {
-		const missionClearAll = new MissionClearAll(this.SYSTEM_ID, this.COMPONENT_ID)
+		const missionClearAll = new MissionClearAll(this.SYSTEM_ID(), this.COMPONENT_ID())
 		missionClearAll.mission_type = MavMissionType.MAV_MISSION_TYPE_MISSION
 
 		const missionItems = []
 
 		for(let i = 0; i < this.waypoints.length; i++) {
-			missionItems.push(new MissionItem(this.SYSTEM_ID, this.COMPONENT_ID))
+			missionItems.push(new MissionItem(this.SYSTEM_ID(), this.COMPONENT_ID()))
 			const missionItem = missionItems[i];
 			missionItem.seq = i
 			missionItem.frame = MavFrame.MAV_FRAME_GLOBAL
@@ -189,12 +183,10 @@ export default class MissionPlanner extends Vue {
 			missionItem.mission_type = MavMissionType.MAV_MISSION_TYPE_MISSION
 		}
 
-		const mavLinkMessages = [ missionClearAll, ...missionItems ]
+		send('mavlink/clearAll', missionClearAll)
 
-		$.ajax({
-			url: `${window.location.href}/mavlink`,
-			data: [ mavLink.pack(mavLinkMessages) ],
-			success: console.log
+		missionItems.forEach(item => {
+			send('mavlink/missionItem', item)
 		})
 	}
 }
@@ -226,6 +218,10 @@ export default class MissionPlanner extends Vue {
 #buttonAddWaypoint {
 	margin: 4px;
 	grid-column: 10;
+}
+
+.buttonRed {
+	background: #a00;
 }
 
 label {
@@ -276,12 +272,12 @@ label {
 	transition: all 0.5s;
 }
 
-.buttonAddWaypoint {
+.buttonGreen {
 	font-size: 20px;
 	background-color: green;
 }
 
-.buttonAddWaypoint:hover {
+.buttonGreen:hover {
 	background-color: green;
 	box-shadow: 0px 6px 15px #0a0;
 }

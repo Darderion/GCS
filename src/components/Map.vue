@@ -13,6 +13,8 @@ import 'leaflet/dist/leaflet.css';
 
 import Position from '../classes/Position';
 
+// A component that displays a map of the area and waypoints as well as UAV's current position
+
 @Component
 export default class Map extends Vue {
 	@Prop() private position!: Position;
@@ -21,6 +23,7 @@ export default class Map extends Vue {
 	map: L.Map|undefined;
 
 	mounted() {
+		// Initializing a map that displays area around starting coordinates
 		this.map = L.map('map').setView([this.position.latitude, this.position.longitude], 18);
 
 		this.addMap(this.map)
@@ -56,3 +59,4 @@ export default class Map extends Vue {
 	height: 400px;
 }
 </style>
+

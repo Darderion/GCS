@@ -17,7 +17,7 @@
 			@keypress="checkCharacter($event)" @keyup="checkWaypoint()" :id="`Waypoint${waypoint.id}_passRadius`">
 		<div class="arrow up" @click="moveWaypointUp" v-if="hasUpperNeighbor()"></div>
 		<div class="arrow down" @click="moveWaypointDown" v-if="hasLowerNeighbor()"></div>
-		<button class="buttonWaypoint buttonRemoveWaypoint" @click="removeComponent">Remove</button>
+		<button class="buttonWaypoint buttonRed buttonRemoveWaypoint" @click="removeComponent">Remove</button>
 	</div>
 </template>
 
@@ -29,6 +29,8 @@ import MissionPlanner from './MissionPlanner.vue';
 
 import L from 'leaflet';
 
+// A component that represents a mission item and allows a user to change its properties
+
 @Component
 export default class WaypointComponent extends Vue {
 	@Prop() private waypoint!: Waypoint
@@ -37,6 +39,7 @@ export default class WaypointComponent extends Vue {
 	@Prop() private moveWaypointDown!: () => void
 	@Prop() private marker!: L.Marker
 	@Prop() private removeMarker!: (marker: L.Marker) => void
+	@Prop() private updateWaypoints!: () => void
 
 	missionPlanner = this.$parent as MissionPlanner
 
@@ -57,7 +60,10 @@ export default class WaypointComponent extends Vue {
 	checkWaypoint() {
 		const fields = this.waypoint.errorValues()
 
-		if (fields.length == 0) this.updateMarker();
+		if (fields.length == 0) {
+			this.updateMarker();
+			this.updateWaypoints();
+		}
 
 		const waypointComponents = [
 			document.getElementById(`Waypoint${this.waypoint.id}_latitude`),
@@ -90,11 +96,9 @@ export default class WaypointComponent extends Vue {
 				waypointComponents[index]?.classList.remove("inputTextNaN")
 			}
 		})
-
-		console.log(fields)
 	}
 
-	// This function prevents any inputs other than [ '0', '1', ... , '9', '.' ]
+	// This function prevents any inputs other than [ '0', '1', ... , '9', '.', '-' ]
     checkCharacter(event: Event | undefined) {
 		// Modified code from:
 		//	https://stackoverflow.com/questions/39782176/filter-input-text-only-accept-number-and-dot-vue-js
@@ -110,7 +114,6 @@ export default class WaypointComponent extends Vue {
     }
 
 	updateMarker() {
-		console.log(this.waypoint.position.latitude + ", " + this.waypoint.position.longitude + ", " + this.waypoint.position.altitude)
 		this.marker.setLatLng(
 			new L.LatLng(this.waypoint.position.latitude, this.waypoint.position.longitude, this.waypoint.position.altitude)
 		)
@@ -141,10 +144,6 @@ input {
 	font-size: 18px;
 	height: 70%;
 	margin: 4px;
-}
-
-.buttonRemoveWaypoint {
-	background: #a00;
 }
 
 div.arrow {

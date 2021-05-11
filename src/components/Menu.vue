@@ -9,29 +9,32 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
+// A component that displays buttons which switch elements displayed in the web application
+
 @Component
 export default class Menu extends Vue {
 	activeWindow = 0;
 
-	windows = [
-		"map",
-		"camera"
-	]
+	@Prop() private changeActiveWindow!: (windowIndex: number) => void
+	@Prop() private windows!: number[];
 
 	mounted() {
 		this.select(this.activeWindow)
 	}
 
+	// A method that changes "activeWindow" property and menu button's styles to show which option is currently selected
 	select(menuOption: number) {
 		if (menuOption < 0) throw Error(`Menu option is ${menuOption} < 0`)
 		if (menuOption >= this.windows.length) throw Error(`Menu option is ${menuOption} >= numberOfMenuOptions`)
 		this.activeWindow = menuOption;
+		this.changeActiveWindow(menuOption)
 
 		this.windows.forEach((window, index) => {
 			const button = document.getElementById(`${window}Button`)
 			if (button == undefined) throw Error(`Error: No menu element "${window}" found`)
 			button.classList.remove(...button.classList)
 			button.classList.add(index == menuOption ? "selected" : "notSelected")
+			button.classList.add('noselect')
 		})
 	}
 }
@@ -126,6 +129,16 @@ li {
 	background-color: #282;
 	z-index: -1;
 	box-shadow: -0.2rem -0.2rem -0.5rem rgba(0, 0, 0, 0.2);
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
 }
 
 </style>
