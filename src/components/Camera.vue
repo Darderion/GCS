@@ -28,7 +28,7 @@ export default class Camera extends Vue {
 <style scoped>
 #camera {
 	background-color: green;
-	width: 90%;
+	width: 80%;
 	height: 400px;
 }
 

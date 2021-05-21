@@ -9,7 +9,7 @@
 		</tr>
 		</thead>
 		<tbody class="table-hover">
-			<tr v-for="property in this.properties.filter(item => !item.userControlled)" :key="`property${property.toString()}`">
+			<tr v-for="property in this.properties.filter(item => !item.userControlled)" :key="`property${property.name}`">
 				<td>{{property.name}}</td>
 				<td>{{property.value}}</td>
 			</tr>
@@ -24,7 +24,7 @@
 		</thead>
 
 		<tbody class="table-hover" id="tableProperties">
-		<tr v-for="property in this.properties.filter(item => item.userControlled)" :key="`property${property.toString()}`">
+		<tr v-for="property in this.properties.filter(item => item.userControlled)" :key="`property${property.name}`">
 			<td>{{property.name}}</td>
 			<td>
 				<input class="property_confirmed" type="number" :value="property.value">
